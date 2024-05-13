@@ -34,7 +34,7 @@ esp32: initialize-submodules
 	@$(MAKE) -C $(BUILD_ROOT)
 
 .PHONY: init
-init: $(BUILD_ROOT)/sdkconfig.defaults $(BUILD_ROOT)/local.mk $(BUILD_ROOT)/partitions.csv
+init: $(BUILD_ROOT)/sdkconfig.defaults $(BUILD_ROOT)/target.mk $(BUILD_ROOT)/partitions.csv
 
 $(BUILD_ROOT)/sdkconfig.defaults: initialize-submodules
 	@cp $(TOIT_ROOT)/toolchains/$(TARGET)/sdkconfig.defaults $@
