@@ -4,10 +4,11 @@
 
 cmake_minimum_required(VERSION 3.5)
 
-set(IDF_PATH "../toit/third_party/esp-idf" CACHE FILEPATH "Path to the ESP-IDF directory")
-set(TOIT_SDK_DIR "../build/host/sdk" CACHE FILEPATH "Path to the Toit SDK directory")
+set(IDF_PATH "$ENV{IDF_PATH}" CACHE FILEPATH "Path to the ESP-IDF directory")
+set(TOIT_SDK_DIR "$ENV{TOIT_SDK_DIR}" CACHE FILEPATH "Path to the Toit SDK directory")
+set(TOIT_EXTRA_COMPONENTS "$ENV{TOIT_EXTRA_COMPONENTS}" CACHE FILEPATH "Path to Toit components directories")
 
-list(APPEND EXTRA_COMPONENT_DIRS "../toit/toolchains/idf/components" "../components")
+list(APPEND EXTRA_COMPONENT_DIRS "../toit/toolchains/idf/components" ${TOIT_EXTRA_COMPONENTS})
 
 include("${IDF_PATH}/tools/cmake/project.cmake")
 project(toit)

@@ -2,27 +2,45 @@
 # Use of this source code is governed by a Zero-Clause BSD license that can
 # be found in the LICENSE file.
 
+SOURCE_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 SHELL := bash
 .SHELLFLAGS += -e
 
-SOURCE_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+# All these variable should be set when calling this Makefile.
+# The top-level Makefile does this.
+IDF_TARGET :=
+COMPONENTS :=
+BUILD_PATH :=
+TOIT_ROOT :=
+IDF_PATH :=
+IDF_PY :=
 
-include target.mk
+ifndef BUILD_PATH
+$(error BUILD_PATH is not set)
+endif
+ifndef IDF_TARGET
+$(error IDF_TARGET is not set)
+endif
 
-# The following path must be kept in sync with the one in the CMakelists.txt file.
-IDF_PATH := $(SOURCE_DIR)/../toit/third_party/esp-idf
-IDF_PY := $(IDF_PATH)/tools/idf.py
-TOIT_ROOT := $(SOURCE_DIR)/../toit
-BUILD_PATH := $(SOURCE_DIR)/../build
-BUILD_ESP32_PATH := $(BUILD_PATH)/esp32
-# The following path must be kept in sync with the one in the CMakelists.txt file.
-SDK_PATH := $(BUILD_ESP32_PATH)/sdk
+IDF_BUILD_PATH := $(BUILD_PATH)/$(IDF_TARGET)
+HOST_BUILD_PATH := $(BUILD_PATH)/host
+SDK_PATH := $(HOST_BUILD_PATH)/sdk
 
 ifeq ($(OS),Windows_NT)
 	EXE_SUFFIX=.exe
 else
 	EXE_SUFFIX=
 endif
+
+define call-cmake
+	@cmake -E env \
+		"IDF_PATH=$(IDF_PATH)" \
+		"IDF_TARGET=$(IDF_TARGET)" \
+		"IDF_CCACHE_ENABLE=1" \
+		"TOIT_EXTRA_COMPONENTS=$(COMPONENTS)" \
+		"TOIT_SDK_DIR=$(SDK_PATH)" \
+		$(IDF_PY) -B "$(IDF_BUILD_PATH)" $(1)
+endef
 
 .PHONY: all
 all: esp32
@@ -39,11 +57,13 @@ esp32: $(SDK_PATH)/bin/toit$(EXE_SUFFIX)
 
 .PHONY: esp32-no-env
 esp32-no-env: check-env
-	@cmake -E env IDF_TARGET=$(TARGET) IDF_CCACHE_ENABLE=1 python$(EXE_SUFFIX) "$(IDF_PY)" -C . -B"$(BUILD_PATH)" build
+	@$(call call-cmake,build)
 
 .PHONY: build-host
 build-host:
-	@$(MAKE) -C "$(TOIT_ROOT)" BUILD=$(BUILD_PATH)
+	# Note that the 'host' is automatically added.
+	@cmake -E env \
+		$(MAKE) -C "$(TOIT_ROOT)" BUILD=$(BUILD_PATH)
 
 $(SDK_PATH)/bin/toit$(EXE_SUFFIX): build-host
 
@@ -54,8 +74,8 @@ menuconfig:
 
 .PHONY: menuconfig-no-env
 menuconfig-no-env: check-env
-	@cmake -E env IDF_TARGET=$(TARGET) python$(EXE_SUFFIX) $(IDF_PY) -B $(BUILD_PATH) menuconfig
-	@cmake -E env IDF_TARGET=$(TARGET) python$(EXE_SUFFIX) $(IDF_PY) -B $(BUILD_PATH) save-defconfig
+	@$(call call-cmake,menuconfig)
+	@$(call call-cmake,save-defconfig)
 
 .PHONY: clean
 clean:
