@@ -63,6 +63,7 @@ esp32-no-env: check-env
 build-host:
 	# Note that the 'host' is automatically added.
 	@cmake -E env \
+		"EXTERNAL_TOIT_LIB_DIRS=$(COMPONENTS)" \
 		$(MAKE) -C "$(TOIT_ROOT)" BUILD=$(BUILD_PATH)
 
 $(SDK_PATH)/bin/toit$(EXE_SUFFIX): build-host
