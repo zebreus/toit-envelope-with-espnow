@@ -60,7 +60,7 @@ esp32: initialize-submodules
 
 .PHONY: menuconfig
 menuconfig: initialize-submodules
-	@(call toit-make,menuconfig)
+	@$(call toit-make,menuconfig)
 
 .PHONY: clean
 clean:
