@@ -47,6 +47,9 @@ initialize-submodules:
 host: initialize-submodules
 	@$(call toit-make,build-host)
 
+.PHONY: build-host
+build-host: host
+
 .PHONY: esp32
 esp32: initialize-submodules
 	@if [[ ! -f $(BUILD_ROOT)/sdkconfig.defaults ]]; then \

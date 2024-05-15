@@ -39,7 +39,7 @@ define call-cmake
 		"IDF_CCACHE_ENABLE=1" \
 		"TOIT_EXTRA_COMPONENTS=$(COMPONENTS)" \
 		"TOIT_SDK_DIR=$(SDK_PATH)" \
-		$(IDF_PY) -B "$(IDF_BUILD_PATH)" $(1)
+		python $(IDF_PY) -B "$(IDF_BUILD_PATH)" $(1)
 endef
 
 .PHONY: all
@@ -47,21 +47,36 @@ all: esp32
 
 .PHONY: check-env
 check-env:
-	$(MAKE) -C "$(TOIT_ROOT)" check-env
-	$(MAKE) -C "$(TOIT_ROOT)" check-esp32-env
+	@$(MAKE) -C "$(TOIT_ROOT)" check-env
+	@$(MAKE) -C "$(TOIT_ROOT)" check-esp32-env
+
+.PHONY: check-windows
+check-windows:
+	@if [ "$(OS)" = "Windows_NT" ]; then \
+		echo "==============================================================="; \
+		echo "Please run in a powershell:"; \
+		if [ "$(shell command -v xtensa-esp32-elf-g++)" = "" ]; then \
+			echo '$(IDF_PATH)/export.ps1'; \
+		fi; \
+		echo 'cmake -E env "IDF_PATH=$(IDF_PATH)" "IDF_TARGET=$(IDF_TARGET)" "IDF_CCACHE_ENABLE=1" "TOIT_EXTRA_COMPONENTS=$(COMPONENTS)" "TOIT_SDK_DIR=$(SDK_PATH)" python $(IDF_PY) -B "$(IDF_BUILD_PATH)" -C "$(SOURCE_DIR)" build'; \
+		echo "==============================================================="; \
+		exit 1; \
+	fi
 
 .PHONY: esp32
-esp32: $(SDK_PATH)/bin/toit$(EXE_SUFFIX)
-	@if [ "$(shell command -v xtensa-esp32-elf-g++)" = "" ]; then source '$(IDF_PATH)/export.sh'; fi; \
-	    $(MAKE) esp32-no-env
+esp32: $(SDK_PATH)/bin/toit$(EXE_SUFFIX) check-windows
+	@if [ "$(shell command -v xtensa-esp32-elf-g++)" = "" ]; then \
+		source '$(IDF_PATH)/export.sh'; \
+	fi; \
+	$(MAKE) esp32-no-env
 
 .PHONY: esp32-no-env
-esp32-no-env: check-env
+esp32-no-env: check-env check-windows
 	@$(call call-cmake,build)
 
 .PHONY: build-host
 build-host:
-	# Note that the 'host' is automatically added.
+	@# Note that the 'host' is automatically added.
 	@cmake -E env \
 		"EXTERNAL_TOIT_LIB_DIRS=$(COMPONENTS)" \
 		$(MAKE) -C "$(TOIT_ROOT)" BUILD=$(BUILD_PATH)
@@ -71,7 +86,7 @@ $(SDK_PATH)/bin/toit$(EXE_SUFFIX): build-host
 .PHONY: menuconfig
 menuconfig:
 	@if [ "$(shell command -v xtensa-esp32-elf-g++)" = "" ]; then source '$(IDF_PATH)/export.sh'; fi; \
-	    $(MAKE) menuconfig-no-env
+	$(MAKE) menuconfig-no-env
 
 .PHONY: menuconfig-no-env
 menuconfig-no-env: check-env
