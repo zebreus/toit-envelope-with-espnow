@@ -80,11 +80,10 @@ static toit_err_t on_removed(void* user_data) {
 static void __attribute__((constructor)) init() {
   echo_service_t* echo_service = (echo_service_t*)malloc(sizeof(echo_service_t));
   echo_service->msg_context = NULL;
-  toit_msg_cbs_t cbs = {
-    .on_created = on_created,
-    .on_message = on_message,
-    .on_rpc_request = on_rpc_request,
-    .on_removed = on_removed,
-  };
+  toit_msg_cbs_t cbs = TOIT_MSG_EMPTY_CBS();
+  cbs.on_created = on_created;
+  cbs.on_message = on_message;
+  cbs.on_rpc_request = on_rpc_request;
+  cbs.on_removed = on_removed;
   toit_msg_add_handler("toitlang.org/demo-echo", echo_service, cbs);
 }
