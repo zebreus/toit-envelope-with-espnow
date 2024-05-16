@@ -36,7 +36,7 @@ static toit_err_t on_created(void* user_data, toit_msg_context_t* context) {
 /// @param data The data of the message.
 /// @param length The length of the message.
 /// @return TOIT_ERR_SUCCESS. The only allowed return value.
-static toit_err_t on_message(void* user_data, int sender, void* data, int length) {
+static toit_err_t on_message(void* user_data, int sender, uint8_t* data, int length) {
   echo_service_t* echo_service = (echo_service_t*)user_data;
   toit_msg_context_t* context = echo_service->msg_context;
   if (toit_msg_notify(context, sender, data, length, true) != TOIT_ERR_SUCCESS) {
@@ -58,7 +58,7 @@ static toit_err_t on_message(void* user_data, int sender, void* data, int length
 /// @param data The data of the request.
 /// @param length The length of the request.
 /// @return TOIT_ERR_SUCCESS. The only allowed return value.
-static toit_err_t on_rpc_request(void* user_data, int sender, int function, toit_msg_request_handle_t handle, void* data, int length) {
+static toit_err_t on_rpc_request(void* user_data, int sender, int function, toit_msg_request_handle_t handle, uint8_t* data, int length) {
   if (toit_msg_request_reply(handle, data, length, true) != TOIT_ERR_SUCCESS) {
     printf("unable to reply\n");
   }
@@ -81,10 +81,10 @@ static void __attribute__((constructor)) init() {
   echo_service_t* echo_service = (echo_service_t*)malloc(sizeof(echo_service_t));
   echo_service->msg_context = NULL;
   toit_msg_cbs_t cbs = {
-    .on_created = &on_created,
-    .on_message = &on_message,
-    .on_rpc_request = &on_rpc_request,
-    .on_removed = &on_removed,
+    .on_created = on_created,
+    .on_message = on_message,
+    .on_rpc_request = on_rpc_request,
+    .on_removed = on_removed,
   };
   toit_msg_add_handler("toitlang.org/demo-echo", echo_service, cbs);
 }
