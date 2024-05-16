@@ -1,2 +1,3 @@
 .packages/
 /build/
+/build-root/sdkconfig.old
