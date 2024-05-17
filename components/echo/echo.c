@@ -19,11 +19,11 @@ typedef struct {
 /// @param user_data The user data passed to `toit_msg_add_handler`.
 /// @param context The context of the external message handler. Calls to
 ///           `toit_msg_notify` and `toit_msg_remove_handler` need this context.
-/// @return TOIT_ERR_SUCCESS. The only allowed return value.
+/// @return TOIT_OK. The only allowed return value.
 static toit_err_t on_created(void* user_data, toit_msg_context_t* context) {
   echo_service_t* echo_service = (echo_service_t*)user_data;
   echo_service->msg_context = context;
-  return TOIT_ERR_SUCCESS;
+  return TOIT_OK;
 }
 
 /// @brief Called when a notification message is received.
@@ -35,14 +35,14 @@ static toit_err_t on_created(void* user_data, toit_msg_context_t* context) {
 /// @param sender The id of the sender.
 /// @param data The data of the message.
 /// @param length The length of the message.
-/// @return TOIT_ERR_SUCCESS. The only allowed return value.
+/// @return TOIT_OK. The only allowed return value.
 static toit_err_t on_message(void* user_data, int sender, uint8_t* data, int length) {
   echo_service_t* echo_service = (echo_service_t*)user_data;
   toit_msg_context_t* context = echo_service->msg_context;
-  if (toit_msg_notify(context, sender, data, length, true) != TOIT_ERR_SUCCESS) {
+  if (toit_msg_notify(context, sender, data, length, true) != TOIT_OK) {
     printf("unable to send\n");
   }
-  return TOIT_ERR_SUCCESS;
+  return TOIT_OK;
 }
 
 /// @brief Called when an RPC request is received.
@@ -57,12 +57,12 @@ static toit_err_t on_message(void* user_data, int sender, uint8_t* data, int len
 ///               `toit_msg_request_reply` or `toit_msg_request_fail`.
 /// @param data The data of the request.
 /// @param length The length of the request.
-/// @return TOIT_ERR_SUCCESS. The only allowed return value.
+/// @return TOIT_OK. The only allowed return value.
 static toit_err_t on_rpc_request(void* user_data, int sender, int function, toit_msg_request_handle_t handle, uint8_t* data, int length) {
-  if (toit_msg_request_reply(handle, data, length, true) != TOIT_ERR_SUCCESS) {
+  if (toit_msg_request_reply(handle, data, length, true) != TOIT_OK) {
     printf("unable to reply\n");
   }
-  return TOIT_ERR_SUCCESS;
+  return TOIT_OK;
 }
 
 /// @brief Called when the external message handler is removed.
@@ -70,10 +70,10 @@ static toit_err_t on_rpc_request(void* user_data, int sender, int function, toit
 /// When this function is called, it is safe to free the user data.
 ///
 /// @param user_data The user data passed to `toit_msg_add_handler`.
-/// @return TOIT_ERR_SUCCESS. The only allowed return value.
+/// @return TOIT_OK. The only allowed return value.
 static toit_err_t on_removed(void* user_data) {
   free(user_data);
-  return TOIT_ERR_SUCCESS;
+  return TOIT_OK;
 }
 
 /// @brief  Register the external service.

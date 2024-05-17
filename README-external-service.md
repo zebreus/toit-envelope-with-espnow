@@ -22,12 +22,11 @@ Example:
 ``` c
 /// @brief  Register an external service.
 static void __attribute__((constructor)) init() {
-  toit_msg_cbs_t cbs = {
-    .on_created = on_created,
-    .on_message = on_message,
-    .on_rpc_request = on_rpc_request,
-    .on_removed = on_removed,
-  };
+  toit_msg_cbs_t cbs = TOIT_MSG_EMPTY_CBS();
+  cbs.on_created = on_created;
+  cbs.on_message = on_message;
+  cbs.on_rpc_request = on_rpc_request;
+  cbs.on_removed = on_removed;
   toit_msg_add_handler("toitlang.org/demo", NULL, cbs);
 }
 ```
@@ -36,7 +35,7 @@ The second argument to `toit_msg_add_handler` is user-data that is passed to the
 callbacks when they are invoked. In our case we just used `NULL`, but often one
 provides an object that is used to store state that is needed by the callbacks.
 
-Callbacks that are not used can be set to `NULL`.
+Callbacks that are not used can be left unset.
 
 ### ESP-IDF cmake
 
@@ -90,10 +89,10 @@ Example:
 ``` c
 /// A function that echoes back the message it got.
 static toit_err_t on_rpc_request(void* user_data, int sender, int function, toit_msg_request_handle_t handle, uint8_t* data, int length) {
-  if (toit_msg_request_reply(handle, data, length, true) != TOIT_ERR_SUCCESS) {
+  if (toit_msg_request_reply(handle, data, length, true) != TOIT_OK) {
     printf("unable to reply\n");
   }
-  return TOIT_ERR_SUCCESS;
+  return TOIT_OK;
 }
 ```
 
