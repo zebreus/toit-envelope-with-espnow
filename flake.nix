@@ -57,7 +57,7 @@
       {
         name = "rudelblinken-envelope";
 
-        packages.default = pkgs.writeShellApplication {
+        packages.default = pkgs.writeShellApplication rec {
           name = "build-firmware";
           runtimeInputs = [
             pkgs.esp-idf-full
@@ -66,6 +66,8 @@
             pkgs.zlib
             pkgs.go
             pkgs.git
+            pkgs.cmake
+            pkgs.gnumake
           ];
           text = ''
             set -x
@@ -79,7 +81,9 @@
             fi
             cd "$REPO_DIR"
             git stash
-            git pull -f
+            git fetch origin main
+            git reset --hard FETCH_HEAD
+            git pull --recurse-submodules -f
 
             cd toit
             git tag -f v2.0.0-alpha.160
